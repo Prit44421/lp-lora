@@ -1,0 +1,12 @@
+__pycache__/
+*.pyc
+.venv/
+venv/
+wandb/
+outputs/
+checkpoints/
+*.pt
+*.bin
+*.safetensors
+.DS_Store
+EOF
