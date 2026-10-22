@@ -1,3 +1,7 @@
+import sys
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+
 import torch
 import torch.nn as nn
 from src.allocator import replace_linear_with_lplora, LpLoRAAllocator
@@ -37,12 +41,15 @@ def main():
     optimizer = torch.optim.AdamW(trainable_params, lr=5e-3)
 
     # Initialize the lp-LoRA Allocator (target: prune 50% of total ranks -> from 64 down to 32)
+    total_steps = 200
     allocator = LpLoRAAllocator(
         model,
+        total_steps=total_steps,
         M=10.0,
         p=0.5,
         prune_every=50,
-        warmup_steps=50,
+        init_warmup_ratio=0.1,
+        final_warmup_ratio=0.7,
         target_rank_ratio=0.5,
     )
 

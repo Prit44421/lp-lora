@@ -1,0 +1,9 @@
+Run ID,Method,Model,Task,Metric,Best Val Score (%),Active / Initial Ranks,Time (s)
+deberta-v3-base_mrpc_r16_ratio0.5_p0.5,lp-LoRA (p=0.5),deberta-v3-base,MRPC,accuracy,92.89,577 / 1152,189.3
+deberta-v3-base_rte_r16_ratio0.5_p0.5,lp-LoRA (p=0.5),deberta-v3-base,RTE,accuracy,89.17,577 / 1152,219.1
+deberta-v3-base_cola_r16_ratio0.5_p0.5,lp-LoRA (p=0.5),deberta-v3-base,COLA,matthews_correlation,69.5,577 / 1152,354.6
+deberta-v3-base_stsb_r16_ratio0.5_p0.5,lp-LoRA (p=0.5),deberta-v3-base,STSB,pearson,91.52,577 / 1152,265.1
+deberta-v3-base_mrpc_r8_ratio1.0_p0.5,Standard LoRA (Uniform r=8),deberta-v3-base,MRPC,accuracy,91.91,576 / 576,187.3
+deberta-v3-base_rte_r8_ratio1.0_p0.5,Standard LoRA (Uniform r=8),deberta-v3-base,RTE,accuracy,87.0,576 / 576,218.5
+deberta-v3-base_mrpc_r16_ratio0.5_p0.2,lp-LoRA (p=0.2),deberta-v3-base,MRPC,accuracy,92.16,577 / 1152,188.8
+deberta-v3-base_mrpc_r16_ratio0.5_p0.8,lp-LoRA (p=0.8),deberta-v3-base,MRPC,accuracy,92.4,577 / 1152,189.0

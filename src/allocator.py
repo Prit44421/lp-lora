@@ -97,6 +97,10 @@ class LpLoRAAllocator:
         all_t = torch.cat(t_list)
         all_active = torch.cat(active_list)
 
+        # Safety check: if norms are non-finite, skip pruning
+        if not (torch.isfinite(all_s).all() and torch.isfinite(all_t).all()):
+            return
+
         curr_ratio = self.get_current_target_ratio()
         target_k = max(1, int(round(self.initial_total_rank * curr_ratio)))
         current_alive = int(all_active.sum().item())
@@ -110,6 +114,10 @@ class LpLoRAAllocator:
         )
         keep_mask = keep_mask & all_active
 
+        # Never allow all ranks to be wiped out
+        if keep_mask.sum().item() == 0:
+            return
+
         idx = 0
         for layer in self.lora_layers.values():
             r = layer.r
@@ -118,14 +126,15 @@ class LpLoRAAllocator:
 
     @torch.no_grad()
     def _find_lambda_for_budget(self, all_s, all_t, all_active, target_k: int) -> float:
-        low, high = 0.0, 1e-2
-        for _ in range(25):
+        low, high = 0.0, 1e-8
+        for _ in range(40):
             keep, _, _ = lp_lora_threshold_solver(all_s, all_t, M=self.M, lam=high, p=self.p)
             if (keep & all_active).sum().item() <= target_k:
                 break
+            low = high
             high *= 2.0
 
-        for _ in range(25):
+        for _ in range(30):
             mid = 0.5 * (low + high)
             keep, _, _ = lp_lora_threshold_solver(all_s, all_t, M=self.M, lam=mid, p=self.p)
             alive = (keep & all_active).sum().item()
@@ -133,7 +142,7 @@ class LpLoRAAllocator:
                 low = mid
             else:
                 high = mid
-        return high
+        return low
 
     def get_rank_summary(self) -> dict:
         return {name: layer.effective_rank for name, layer in self.lora_layers.items()}

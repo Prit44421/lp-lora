@@ -65,13 +65,15 @@ class LpLoRALinear(nn.Module):
     def update_gradient_ema(self):
         """Updates the running average of gradients (\bar{G}_A, \bar{G}_B) after loss.backward()."""
         if self.lora_A.grad is not None and self.lora_B.grad is not None:
-            # Zero out gradients of already-pruned bricks so they never wake back up
-            mask_A = self.rank_mask.unsqueeze(1)  # [r, 1]
-            mask_B = self.rank_mask.unsqueeze(0)  # [1, r]
+            # Safety guard: skip if gradients contain NaN or Inf
+            if not (torch.isfinite(self.lora_A.grad).all() and torch.isfinite(self.lora_B.grad).all()):
+                return
+
+            mask_A = self.rank_mask.unsqueeze(1)
+            mask_B = self.rank_mask.unsqueeze(0)
             self.lora_A.grad.mul_(mask_A)
             self.lora_B.grad.mul_(mask_B)
 
-            # Exponential moving average: G_bar = beta * G_bar + (1 - beta) * grad
             self.grad_ema_A.mul_(self.ema_beta).add_(self.lora_A.grad, alpha=1.0 - self.ema_beta)
             self.grad_ema_B.mul_(self.ema_beta).add_(self.lora_B.grad, alpha=1.0 - self.ema_beta)
 

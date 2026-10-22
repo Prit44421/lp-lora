@@ -9,4 +9,5 @@ checkpoints/
 *.bin
 *.safetensors
 .DS_Store
-EOF
+.ipynb_checkpoints/
+context.txt
